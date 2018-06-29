@@ -21,24 +21,24 @@ Opcoes BYTE "				  1 - COMECAR",0ah, 0dh			; Textos da tela inicial
 		BYTE "	AJUDA:	Use as SETAS par CIMA e para BAIXO para desviar dos Baloes", 0ah, 0dh
 		BYTE "		para marcar o maior numero de pontos posivel, Boa Sorte :)",0
     	
-Fila0 BYTE 0, 2, 0, 0, 0, 2, 0, 0							; Iniciando as tres linhas horizontais invisiveis do Jogo
-Fila1 BYTE 1, 0, 0, 2, 0, 0, 0, 0
-Fila2 BYTE 0, 2, 0, 0, 0, 2, 0, 0
+Fila0 BYTE 0, 0, 0, 0, 0, 0, 0, 0							; Iniciando as tres linhas horizontais invisiveis do Jogo
+Fila1 BYTE 1, 0, 0, 0, 0, 0, 0, 0
+Fila2 BYTE 0, 0, 0, 0, 0, 0, 0, 0
 
 ArvoreX BYTE 4												; Declarando o tamanho dos eixos dos obstaculos
 ArvoreY BYTE 4
 Arvore BYTE  32, 254, 254 ,254, 254, 254, 254, 254,  32,	; Desenhando os obstaculos com caracteres
 		  254, 254, 254, 254, 254, 254, 254, 254, 254,
 		  254, 254, 254, 254, 254, 254, 254, 254, 254,
-		   32, 254,  32, 254,  32, 254,  32, 254,  32,
-		   32,  32, 254, 254, 254, 254, 254,  32,  32 
+		   32, 32,  32, 254,  254, 254,  32, 32,  32,
+		   32, 32, 32, 254, 254, 254, 32,  32,  32 
 
 DinoX BYTE 4												; Declarando o tamanho dos eixos personagem
 DinoY BYTE 10
-Dino BYTE 254, 254,  32 ,254, 254, 254,  32,  32, 32,		; Desenhando o personagem com caracteres
-			254, 254,  32, 254,  32, 254,  32, 254, 32,
-			 32, 254, 254, 254, 254, 254, 254, 254, 32,
-			 32,  32,  32,  32,  32, 254,  32, 254, 32
+Dino BYTE 32, 32,  32 ,32, 32, 32,  254,  254, 254,		; Desenhando o personagem com caracteres
+			32, 32,  32, 32,  32, 254,  32, 32, 32,
+			 254, 254, 254, 254, 254, 254, 254, 254, 254,
+			 254,  254,  254,  254,  254, 254,  254, 254, 254
 
 GameOver BYTE "		 _____                          ____                  ",0ah, 0dh     	; Textos de Fim de jogo           
 		  BYTE "		/ ____|                        / __ \                 ",0ah, 0dh
@@ -47,12 +47,12 @@ GameOver BYTE "		 _____                          ____                  ",0ah, 0d
 		  BYTE "		| |__| | (_| | | | | | |  __/ | |__| |\ V /  __/ |    ",0ah, 0dh
 		  BYTE "		\______|\__,_|_| |_| |_|\___|  \____/  \_/ \___|_|    ",0
 
-Dinossauro BYTE "			   	             _              ",0ah, 0dh						; Texto com o nome do jogo impresso no inicio
-       BYTE "			       /\           (_)			    ",0ah, 0dh
-       BYTE "			      /  \__   ___  ___  _ __	",0ah, 0dh
-       BYTE "			     / /\ \ \ / / |/ _ \| '_ \	",0ah, 0dh
-       BYTE "			    / ____ \ V /| | (_) | | | |	",0ah, 0dh
-       BYTE "			   /_/    \_\_/ |_|\___/|_| |_|	",0
+Dinossauro BYTE "			   	         _              ",0ah, 0dh						; Texto com o nome do jogo impresso no inicio
+       BYTE "			                (_)			    ",0ah, 0dh
+       BYTE "			                __ _ __   ___   ",0ah, 0dh
+       BYTE "			                | | '_ \ / _ \",0ah, 0dh
+       BYTE "			                | | | | | |_| |",0ah, 0dh
+       BYTE "			                |_|_| |_|\___/ 	",0
 
 .code
 
@@ -123,32 +123,32 @@ HUD PROC
 
 HUD ENDP
 
-Atualiza_Pont PROC
+Atualiza_Pont PROC							; procedimento chamado a cada movimento de obstaculo
 
 	.IF Ctrl == 0
-		add Pont, 5
-		mov dl, 60
+		add Pont, 5							; Pontuação incrementada em 5 cada vez que o atualiza_pont é chamado
+		mov dl, 60							; escolhendo a posição a ser impressa a pontuação
 		mov dh, 23
 		call GotoXY
-		push eax
-			mov eax, white
-			call SetTextColor
-			movzx eax, Pont
-			call WriteDec
+		push eax							
+			mov eax, white					; escrevendo a pontuação
+			call SetTextColor				
+			movzx eax, Pont					
+			call WriteDec					
 		pop eax
 	.ENDIF
 	
 	ret
 
 Atualiza_Pont ENDP
-
-Pontu PROC
-	mov eax, white
+											; Escrevendo o texto pontuação
+Pontu PROC									; chamada somente uma vez quando o jogo é iniciado 
+	mov eax, white				
 	call SetTextColor
-	mov dl, 50
+	mov dl, 50								; escolhendo o lugar
 	mov dh, 23
 	call GotoXY
-	mov edx, OFFSET Pontuacao
+	mov edx, OFFSET Pontuacao				; chamando os caracteres pre definidos 
     
 call WriteString 
 
@@ -156,7 +156,7 @@ call WriteString
 
 Pontu ENDP
 
-Atraso_Ctrl PROC
+Atraso_Ctrl PROC							
 		movzx eax, Pont
 		
 		.IF eax > 50 && Ctrl2 == 0
@@ -183,57 +183,65 @@ Atraso_Ctrl PROC
 	ret
 
 Atraso_Ctrl ENDP
-									; GERANDO ALEATORIAMENTE A FILA DE ARVORES
- 									; O jogo possui 3 linhas horizontais onde os objetos sao plotados,
- 									; e 7 posições horizontais na fila 
+										; GERANDO ALEATORIAMENTE A FILA DE ARVORES
+ 										; O jogo possui 3 linhas horizontais onde os objetos sao plotados,
+ 										; e 7 posições horizontais na fila 
 
 Gera_Arvore PROC
-	call Randomize					; função para usar de aleatoriedade
-	mov  eax, 3 					; 4 possibilidades diferentes de combinações de arvores
-call RandomRange 					; eax começa valendo 3, para imprimir primeiro um espaço vazio
+	call Randomize						; função para usar de aleatoriedade
+	mov  eax, 3 						; 4 possibilidades diferentes de combinações de arvores
+call RandomRange 						; eax começa valendo 3, para imprimir primeiro um espaço vazio
 
-	.IF Ctrl == 1					; alternando entre um obstáculo e um espaço vazio
-		mov eax, 3					; Ctrl == 1 -> nenhum obstaculo plotado
+	.IF Ctrl == 1						; alternando entre um obstáculo e um espaço vazio
+		mov eax, 3						; Ctrl == 1 -> nenhum obstaculo plotado
 
-	.ELSEIF Ctrl == 0				; Ctrl == 0 -> uma das combinações é plotada 
-		mov Ctrl, 1					; depois de plotar um dos obstaculos, obrigatoriamente existe um espaço vazio
+	.ELSEIF Ctrl == 0 && Fila2[6]==0 && Fila2[5]==2 ; Imprimindo 2 espaços vazios consecuivos
+		mov eax, 3
+
+	.ELSEIF Ctrl == 0 && Fila2[6]==0 && Fila2[4]==2 ; Imprimindo 3 espaços vazios consecutivos
+		mov eax, 3
+
+	.ELSEIF Ctrl == 0  					; Ctrl == 0 -> uma das combinações é plotada 
+		mov Ctrl, 1						; depois de plotar um dos obstaculos, obrigatoriamente existe um espaço vazio
 	.ENDIF
-									; Adiciona uma arvore no inicio da tela
- 									; o simbolo 2 indica o inicio de uma cadeia de caracteres
+										; Adiciona uma arvore no inicio da tela
+ 										; o simbolo 2 indica o inicio de uma cadeia de caracteres
+
     .IF eax == 0
 	    mov Fila0[7], 0
-		mov Fila1[7], 2
-		mov Fila2[7], 2
-	
-	.ELSEIF eax == 1				; Um obstáculo na primeira linha e outro na ultima
-		mov Fila0[7], 2
 		mov Fila1[7], 0
 		mov Fila2[7], 2
 	
-	.ELSEIF eax == 2				; Obstáculos nas duas primeiras linhas
-		mov Fila0[7], 2
+	.ELSEIF eax == 1					; Um obstáculo na primeira linha e outro na ultima
+		mov Fila0[7], 0
 		mov Fila1[7], 2
-		mov Fila2[7], 0
+		mov Fila2[7], 2
 	
-	.ELSEIF eax == 3				; Espaço vazio, nenhum obstáculo plotado
+	.ELSEIF eax == 2					; Obstáculos nas duas primeiras linhas
+		mov Fila0[7], 0
+		mov Fila1[7], 2
+		mov Fila2[7], 2
+	
+	.ELSEIF eax == 3					; Espaço vazio, nenhum obstáculo plotado
 		mov Fila0[7], 0
 		mov Fila1[7], 0
 		mov Fila2[7], 0
-		mov Ctrl, 0					; indica que na proxima plotagem, 2 obstaculos apareceram
+		mov Ctrl, 0
+										; indica que na proxima plotagem, 2 obstaculos apareceram
 	.ENDIF
-
+	
 	ret		
 
 Gera_Arvore ENDP
-									; POSIÇÃO DO PERSONAGEM 
+										; POSIÇÃO DO PERSONAGEM 
 Move_Dino PROC
-									; O personagem pode se posicionar em 3 posições diferentes no eixo y 
-	.IF DinoY == 4 && Fila0[0] == 0	; Na primeira posição, encima na tela
+										; O personagem pode se posicionar em 3 posições diferentes no eixo y 
+	.IF DinoY == 4 && Fila0[0] == 0  	; Na primeira posição, encima na tela
 		mov Fila0[0], 1
 		mov Fila1[0], 0
 		mov Fila2[0], 0
 	
-	.ELSEIF DinoY == 10 && Fila1[0] == 0 ; Na segunda posição, no meio da tela
+	.ELSEIF DinoY == 10 && Fila1[0] == 0 ;Na segunda posição, no meio da tela
 	    mov Fila0[0], 0
 		mov Fila1[0], 1
 		mov Fila2[0], 0
@@ -406,7 +414,7 @@ Linha: 									; Printando as Linhas
 	PUSH ecx 							; Empilha o valor inicial de ecx
 	mov ecx, 9 							; Contador loop Linha = 9
 	Coluna: 							; Printando as Colunas
-		mov  eax,red  					; definindo a cor do personagem
+		mov  eax,green 					; definindo a cor do personagem
 		call SetTextColor 
 		mov al, [ESI] 					
 		call WriteChar 					; printa
@@ -598,7 +606,7 @@ Op:
 
  Continua: 									; INICIANDO O JOGO DE VERDADE
 	call HUD								; Desenha as bordas
-	call Pontu 								; escreve a pontuação
+	call Pontu 								; escreve o texto pontuação
 	call Gera_Arvore 						; define os obstaculos 
 	call Escreve_Fila						; escreve os obstaculos	
 	call GetMseconds
@@ -613,8 +621,22 @@ Setas:
 		call Apaga_Dino 					; apaga o personagem na posição antiga
 		sub DinoY, 6						; subtrai o eixo y em 6, para o personagem subir 6 posições
 		call Move_Dino						; movimenta o personagem 
-		call Desenha_Dino					; desenha a nova posição do personagem 
+		call Desenha_Dino					; desenha a nova posição do personagem
+		
+		
+		
+		
+		
+		;call Apaga_Dino					; TESTE	
+		;add DinoY, 6						; TESTE
+		;call Move_Dino						; TESTE
+		;Call Desenha_Dino					; TESTE
 
+	
+	
+	
+	
+	
 	.ELSEIF ah == 50h && DinoY != 16		; se a entrada for == a seta para baixo && o personagem não estiver na ultima posição da tela
 	    call Apaga_Dino 					; apaga o personagem na posição antiga
 		add DinoY, 6 						; incrementa o wixo y em 6, para o personagem descer 6 posições
